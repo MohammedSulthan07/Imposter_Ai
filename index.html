@@ -118,6 +118,7 @@ h1,h2,h3{ font-family:'Space Grotesk', sans-serif; margin:0; }
   color:var(--ink); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
 }
 .iconbtn:active{ background:var(--panel-2); }
+.reveal-help-btn{ position:absolute; top:0; right:0; z-index:5; }
 .title-mini{ font-family:'Rajdhani',sans-serif; font-weight:700; letter-spacing:.12em; font-size:15px; text-transform:uppercase; color:var(--ink-dim); }
 
 /* ================= HOME ================= */
@@ -148,6 +149,14 @@ h1,h2,h3{ font-family:'Space Grotesk', sans-serif; margin:0; }
 .home-sub{ color:var(--ink-dim); font-size:15px; margin-top:10px; max-width:300px; }
 .home-actions{ width:100%; display:flex; flex-direction:column; gap:12px; margin-top:40px; }
 .home-foot{ margin-top:26px; color:var(--ink-dim); font-size:12px; letter-spacing:.05em; }
+.score-pill{
+  margin-top:18px; display:flex; align-items:center; gap:10px; background:var(--panel); border:1px solid var(--line);
+  border-radius:20px; padding:10px 18px; font-size:13px; color:var(--ink-dim); cursor:pointer;
+}
+.score-pill b{ color:var(--ink); font-family:'Space Grotesk',sans-serif; }
+.score-pill .score-div{ opacity:.4; }
+.score-pill-inline{ cursor:default; margin: -6px 0 16px; justify-content:center; width:100%; }
+.avatar-dot{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:8px; vertical-align:middle; }
 
 /* ================= SETUP ================= */
 .card{
@@ -196,6 +205,8 @@ h1,h2,h3{ font-family:'Space Grotesk', sans-serif; margin:0; }
   color:var(--ink); font-size:15px; font-family:'Inter',sans-serif;
 }
 .player-input:focus{ outline:none; border-color:var(--violet); }
+.custom-word-fields{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+.custom-input{ width:100%; }
 
 /* ================= REVEAL ================= */
 #screen-reveal{ align-items:center; justify-content:center; text-align:center; }
@@ -308,11 +319,11 @@ h1,h2,h3{ font-family:'Space Grotesk', sans-serif; margin:0; }
 }
 .vote-card .avatar{
   width:52px; height:52px; border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center;
-  background:var(--panel-2); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:var(--ink-dim);
+  background:var(--ac, var(--panel-2)); font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:#fff;
 }
 .vote-card .vname{ font-size:14px; font-weight:600; }
 .vote-card.selected{ border-color:var(--crimson); background:rgba(255,59,92,0.1); }
-.vote-card.selected .avatar{ background: linear-gradient(135deg, var(--crimson), var(--crimson-2)); color:#fff; }
+.vote-card.selected .avatar{ background: linear-gradient(135deg, var(--crimson), var(--crimson-2)) !important; color:#fff; }
 
 /* ================= RESULTS ================= */
 #screen-results{ align-items:center; text-align:center; }
@@ -330,11 +341,18 @@ h1,h2,h3{ font-family:'Space Grotesk', sans-serif; margin:0; }
   border-radius:14px; padding:12px 14px; margin-bottom:8px;
 }
 .reveal-row .rname{ font-size:14px; font-weight:600; display:flex; align-items:center; gap:8px; }
+.reveal-row-right{ display:flex; align-items:center; gap:10px; }
+.player-score{ font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; color:var(--ink-dim); white-space:nowrap; }
+.score-gain{ color:var(--green); }
 .tag{ font-family:'Rajdhani',sans-serif; font-weight:700; letter-spacing:.06em; font-size:11px; padding:5px 10px; border-radius:20px; text-transform:uppercase; }
 .tag.civ{ background:rgba(124,92,255,0.16); color:#b3a4ff; }
 .tag.imp{ background:rgba(255,59,92,0.18); color:#ff92a5; }
 .secret-reveal{ margin: 16px 0 20px; font-size:14px; color:var(--ink-dim); }
 .secret-reveal b{ color:var(--ink); font-family:'Space Grotesk',sans-serif; font-size:17px; }
+.leaderboard-heading{
+  width:100%; font-family:'Rajdhani',sans-serif; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  font-size:12px; color:var(--ink-dim); margin-bottom:10px;
+}
 .results-actions{ width:100%; display:flex; flex-direction:column; gap:10px; margin-top:6px; }
 
 /* ================= HOW TO PLAY ================= */
@@ -360,9 +378,10 @@ h1,h2,h3{ font-family:'Space Grotesk', sans-serif; margin:0; }
     <div class="eyebrow">Social Deduction · Party Game</div>
     <h1 class="home-title">IMP<span>OSTOR</span></h1>
     <p class="home-sub">Everyone knows the secret word. Except one. Talk, bluff, and vote them out before it's too late.</p>
+    <div class="score-pill" id="homeScore" onclick="resetScore()" style="display:none;"></div>
     <div class="home-actions">
       <button class="btn btn-primary" onclick="goTo('setup')">▶ New Game</button>
-      <button class="btn btn-ghost" onclick="goTo('howto')">How to Play</button>
+      <button class="btn btn-ghost" onclick="openHowTo('home')">How to Play</button>
     </div>
     <div class="home-foot">3–15 players · pass &amp; play on one device</div>
   </section>
@@ -370,7 +389,7 @@ h1,h2,h3{ font-family:'Space Grotesk', sans-serif; margin:0; }
   <!-- ================= HOW TO PLAY ================= -->
   <section class="screen" id="screen-howto">
     <div class="topbar">
-      <div class="iconbtn" onclick="goTo('home')">←</div>
+      <div class="iconbtn" onclick="closeHowTo()">←</div>
       <div class="title-mini">How to Play</div>
       <div style="width:40px"></div>
     </div>
@@ -380,7 +399,7 @@ h1,h2,h3{ font-family:'Space Grotesk', sans-serif; margin:0; }
     <div class="rule-item"><div class="rule-num">4</div><div class="rule-text">Discuss and debate using the timer, then everyone <b>votes</b> on who they think the imposter is.</div></div>
     <div class="rule-item"><div class="rule-num">5</div><div class="rule-text">If the group votes out an imposter, <b>civilians win</b>. If they vote wrong, the <b>imposter escapes</b>.</div></div>
     <div class="spacer"></div>
-    <button class="btn btn-primary" onclick="goTo('home')">Got it</button>
+    <button class="btn btn-primary" onclick="closeHowTo()">Got it</button>
   </section>
 
   <!-- ================= SETUP ================= -->
@@ -388,7 +407,7 @@ h1,h2,h3{ font-family:'Space Grotesk', sans-serif; margin:0; }
     <div class="topbar">
       <div class="iconbtn" onclick="goTo('home')">←</div>
       <div class="title-mini">Game Setup</div>
-      <div style="width:40px"></div>
+      <div class="iconbtn" onclick="openHowTo('setup')">?</div>
     </div>
 
     <div class="card">
@@ -430,6 +449,17 @@ h1,h2,h3{ font-family:'Space Grotesk', sans-serif; margin:0; }
       <div class="cat-grid" id="catGrid"></div>
     </div>
 
+    <div class="card">
+      <div class="toggle-row">
+        <div class="toggle-text">Use a custom word<small>Type your own word instead of a random one</small></div>
+        <div class="switch" id="customWordSwitch" onclick="toggleCustomWord()"></div>
+      </div>
+      <div id="customWordFields" class="custom-word-fields" style="display:none;">
+        <input class="player-input custom-input" id="customCategoryInput" placeholder="Category (e.g. Inside Jokes)" maxlength="24">
+        <input class="player-input custom-input" id="customWordInput" placeholder="Secret word" maxlength="30">
+      </div>
+    </div>
+
     <div class="spacer"></div>
     <div class="bottom-cta">
       <button class="btn btn-primary" onclick="goToPlayerNames()">Continue →</button>
@@ -452,6 +482,7 @@ h1,h2,h3{ font-family:'Space Grotesk', sans-serif; margin:0; }
 
   <!-- ================= REVEAL ================= -->
   <section class="screen" id="screen-reveal">
+    <div class="iconbtn reveal-help-btn" onclick="openHowTo('reveal')">?</div>
     <div class="progress-dots" id="progressDots"></div>
 
     <div class="card-stage">
@@ -536,6 +567,7 @@ h1,h2,h3{ font-family:'Space Grotesk', sans-serif; margin:0; }
       <p id="resultSub">—</p>
     </div>
     <div class="secret-reveal">The secret word was <b id="resultWord">—</b></div>
+    <div class="leaderboard-heading">Leaderboard</div>
     <div class="reveal-list" id="resultList"></div>
     <div class="results-actions">
       <button class="btn btn-primary" onclick="playAgainSameGroup()">Play Again — Same Players</button>
@@ -556,11 +588,13 @@ const CATEGORIES = {
   "Places": ["Beach","Airport","Museum","Mountain","Desert","Castle","Zoo","Amusement Park","Library","Hospital","Stadium","Forest","Island","Waterfall","Campsite","Lighthouse","Volcano","Cave","Farm","Rainforest","Bridge","Harbor","Village","Skyscraper"],
   "Household": ["Toothbrush","Umbrella","Pillow","Mirror","Blanket","Candle","Backpack","Vacuum Cleaner","Toaster","Alarm Clock","Frying Pan","Broom","Lamp","Scissors","Wallet","Ladder","Hammer","Remote Control","Suitcase","Keyboard","Bathtub","Curtains","Doormat","Thermometer"],
   "Fantasy": ["Superhero","Villain","Wizard","Dragon","Vampire","Ghost","Zombie","Fairy","Mermaid","Werewolf","Knight","Witch","Robot","Alien","Genie","Pirate","Ninja","Giant","Cape","Spell","Sidekick","Time Machine","Invisible Cloak"],
-  "School": ["Homework","Chalkboard","Recess","Pop Quiz","Report Card","Field Trip","Cafeteria","Principal","Locker","Textbook","Calculator","Graduation","Detention","Playground","Classroom","Whiteboard","Substitute Teacher","Science Fair","Spelling Bee"],
-  "Nature & Weather": ["Rainbow","Thunderstorm","Snowflake","Sunrise","Earthquake","Hurricane","Tornado","Avalanche","Drought","Fog","Northern Lights","Tide","Volcano Eruption","Blizzard","Heatwave","Frost","Monsoon","Eclipse","Meteor Shower"],
+  "School": ["Homework","Chalkboard","Recess","Pop Quiz","Report Card","Field Trip","Cafeteria","Principal","Locker","Textbook","Calculator","Graduation","Detention","Playground","Classroom","Whiteboard","Substitute Teacher","Science Fair","Spelling Bee","Yearbook","Hall Pass","School Bus","Study Group","Class President"],
+  "Nature & Weather": ["Rainbow","Thunderstorm","Snowflake","Sunrise","Earthquake","Hurricane","Tornado","Avalanche","Drought","Fog","Northern Lights","Tide","Volcano Eruption","Blizzard","Heatwave","Frost","Monsoon","Eclipse","Meteor Shower","Glacier","Canyon","Geyser","Sandstorm","Dew"],
   "Music": ["Guitar","Piano","Drums","Violin","Trumpet","Karaoke","Concert","DJ","Choir","Saxophone","Flute","Headphones","Microphone","Orchestra","Rap Battle","Ukulele","Harmonica","Vinyl Record","Boombox","Music Festival"],
   "Transportation": ["Airplane","Submarine","Rocket","Bicycle","Skateboard","Helicopter","Train","Cruise Ship","Hot Air Balloon","Scooter","Motorcycle","Taxi","Sailboat","Tractor","Cable Car","Golf Cart","Ambulance","Space Shuttle","Canoe","Ferry"],
-  "Anime": ["Ai Hoshino","Naruto Uzumaki","Son Goku","Monkey D. Luffy","Levi Ackerman","Tanjiro Kamado","Nezuko Kamado","Eren Yeager","Mikasa Ackerman","Edward Elric","Saitama","Light Yagami","L Lawliet","Gojo Satoru","Izuku Midoriya","Katsuki Bakugo","Killua Zoldyck","Sailor Moon","Spike Spiegel","Ichigo Kurosaki","Rem","Zenitsu Agatsuma","Itachi Uchiha","Pikachu","Sasuke Uchiha","Ruby Hoshino"]
+  "Anime": ["Ai Hoshino","Naruto Uzumaki","Son Goku","Monkey D. Luffy","Levi Ackerman","Tanjiro Kamado","Nezuko Kamado","Eren Yeager","Mikasa Ackerman","Edward Elric","Saitama","Light Yagami","L Lawliet","Gojo Satoru","Izuku Midoriya","Katsuki Bakugo","Killua Zoldyck","Sailor Moon","Spike Spiegel","Ichigo Kurosaki","Rem","Zenitsu Agatsuma","Itachi Uchiha","Pikachu","Sasuke Uchiha","Ruby Hoshino"],
+  "Video Games": ["Boss Battle","Power-Up","Speedrun","Loot Box","Respawn","Multiplayer","Pixel Art","Game Controller","High Score","Side Quest","Checkpoint","Easter Egg","Leaderboard","Game Over","Cutscene","Open World","Battle Royale","Achievement","Glitch","Downloadable Content","Speed Boost","Combo","Tutorial Level","Health Bar"],
+  "Countries": ["Japan","Brazil","Egypt","Canada","France","India","Australia","Mexico","Germany","Kenya","Italy","Thailand","Norway","Greece","Spain","Argentina","South Korea","Turkey","Morocco","Iceland","Peru","Vietnam","Portugal","New Zealand"]
 };
 
 /* Short written clue shown to the imposter as a hint — kept vague enough not to give the word away outright. */
@@ -771,6 +805,11 @@ const HINT_TEXT = {
   "Substitute Teacher": "Temporary teacher filling in for the regular one",
   "Science Fair": "Event where students display science projects",
   "Spelling Bee": "Competition based on spelling words correctly",
+  "Yearbook": "Book of memories and photos from a school year",
+  "Hall Pass": "Permission slip to be out of class",
+  "School Bus": "Vehicle that shuttles students to school",
+  "Study Group": "Group of students reviewing material together",
+  "Class President": "Elected student leader of a class",
   "Rainbow": "Colorful arc seen in the sky after rain",
   "Thunderstorm": "Storm featuring lightning and loud thunder",
   "Snowflake": "Tiny ice crystal that falls in winter",
@@ -790,6 +829,11 @@ const HINT_TEXT = {
   "Monsoon": "Season of heavy seasonal rainfall",
   "Eclipse": "When one celestial body blocks the light of another",
   "Meteor Shower": "Event where many shooting stars appear",
+  "Glacier": "Massive slow-moving body of ice",
+  "Canyon": "Deep valley carved by a river",
+  "Geyser": "Hot spring that erupts water into the air",
+  "Sandstorm": "Strong wind carrying clouds of sand",
+  "Dew": "Water droplets that form overnight on surfaces",
   "Guitar": "Stringed instrument played by strumming or plucking",
   "Piano": "Keyboard instrument with black and white keys",
   "Drums": "Percussion instrument played by striking",
@@ -855,7 +899,57 @@ const HINT_TEXT = {
   "Itachi Uchiha": "Elder brother who wiped out his own clan",
   "Pikachu": "Electric-type mascot creature",
   "Sasuke Uchiha": "Vengeful rival ninja seeking power",
-  "Ruby Hoshino": "Idol sibling from Oshi no Ko"
+  "Ruby Hoshino": "Idol sibling from Oshi no Ko",
+
+  "Boss Battle": "Climactic fight against a powerful game enemy",
+  "Power-Up": "Item that temporarily boosts a player's abilities",
+  "Speedrun": "Attempt to finish a game as fast as possible",
+  "Loot Box": "Purchasable item that gives random in-game rewards",
+  "Respawn": "Reappearing in a game after being defeated",
+  "Multiplayer": "Game mode played with other people",
+  "Pixel Art": "Retro-style digital art made of visible squares",
+  "Game Controller": "Handheld device used to play video games",
+  "High Score": "The best result recorded in a game",
+  "Side Quest": "Optional task separate from the main story",
+  "Checkpoint": "Point in a game where progress is saved",
+  "Easter Egg": "Hidden secret or joke placed by developers",
+  "Leaderboard": "Ranked list of top scoring players",
+  "Game Over": "Screen shown when a player loses",
+  "Cutscene": "Non-playable story sequence in a game",
+  "Open World": "Game style that lets you explore freely",
+  "Battle Royale": "Last-player-standing multiplayer game mode",
+  "Achievement": "In-game reward for completing a challenge",
+  "Glitch": "Unintended bug or error in a game",
+  "Downloadable Content": "Extra content added to a game after release",
+  "Speed Boost": "Temporary burst of extra speed in a game",
+  "Combo": "Chain of successive successful moves or hits",
+  "Tutorial Level": "Introductory stage that teaches how to play",
+  "Health Bar": "On-screen meter showing remaining life",
+
+  "Japan": "Island nation in East Asia known for anime and sushi",
+  "Brazil": "Largest country in South America",
+  "Egypt": "North African country famous for pyramids",
+  "Canada": "Large North American country known for maple syrup",
+  "France": "European country known for the Eiffel Tower",
+  "India": "South Asian country known for the Taj Mahal",
+  "Australia": "Country and continent known for kangaroos",
+  "Mexico": "North American country known for tacos",
+  "Germany": "European country known for its car industry",
+  "Kenya": "East African country known for wildlife safaris",
+  "Italy": "European country shaped like a boot",
+  "Thailand": "Southeast Asian country known for its beaches",
+  "Norway": "Scandinavian country known for fjords",
+  "Greece": "European country known for ancient ruins",
+  "Spain": "European country known for flamenco and tapas",
+  "Argentina": "South American country known for tango",
+  "South Korea": "East Asian country known for K-pop",
+  "Turkey": "Country spanning Europe and Asia",
+  "Morocco": "North African country known for its markets",
+  "Iceland": "Nordic island nation known for volcanoes and glaciers",
+  "Peru": "South American country home to Machu Picchu",
+  "Vietnam": "Southeast Asian country known for pho",
+  "Portugal": "European country known for its coastline",
+  "New Zealand": "Island nation known for its mountains and sheep"
 };
 
 /* ================= STATE ================= */
@@ -876,8 +970,57 @@ let state = {
   timerSecondsLeft: 180,
   timerTotal: 180,
   timerRunning: false,
-  timerInterval: null
+  timerInterval: null,
+  customWordEnabled: false,
+  customCategory: "",
+  customWord: "",
+  playerScores: {}
 };
+
+/* ================= SAVED SETTINGS & SCORE (persist on this device) ================= */
+const STORAGE_KEY = 'imposterGame_v1';
+function saveSettings(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      numPlayers: state.numPlayers,
+      numImposters: state.numImposters,
+      timerMinutes: state.timerMinutes,
+      hintEnabled: state.hintEnabled,
+      selectedCategories: state.selectedCategories,
+      playerNames: state.playerNames,
+      playerScores: state.playerScores
+    }));
+  } catch(e){ /* storage unavailable — game still works, just won't remember */ }
+}
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const saved = JSON.parse(raw);
+    if(saved.numPlayers) state.numPlayers = saved.numPlayers;
+    if(saved.numImposters) state.numImposters = saved.numImposters;
+    if(saved.timerMinutes) state.timerMinutes = saved.timerMinutes;
+    if(typeof saved.hintEnabled === 'boolean') state.hintEnabled = saved.hintEnabled;
+    if(Array.isArray(saved.selectedCategories) && saved.selectedCategories.length){
+      // Only keep categories that still exist (in case the word list changed)
+      state.selectedCategories = saved.selectedCategories.filter(c => CATEGORIES[c]);
+      if(state.selectedCategories.length === 0) state.selectedCategories = Object.keys(CATEGORIES);
+    }
+    if(Array.isArray(saved.playerNames)) state.playerNames = saved.playerNames;
+    if(saved.playerScores && typeof saved.playerScores === 'object') state.playerScores = saved.playerScores;
+  } catch(e){ /* ignore corrupt/blocked storage */ }
+}
+// Scores are tracked by player name (trimmed, case-insensitive) so they carry
+// over across rounds even as roles reshuffle each time.
+function scoreKey(name){ return name.trim().toLowerCase(); }
+function getScore(name){ return state.playerScores[scoreKey(name)] || 0; }
+function addScore(name, amount){
+  const key = scoreKey(name);
+  state.playerScores[key] = (state.playerScores[key] || 0) + amount;
+}
+function vibrate(pattern){
+  try{ if(navigator.vibrate) navigator.vibrate(pattern); } catch(e){ /* not supported — ignore */ }
+}
 
 /* ================= NAVIGATION ================= */
 function goTo(name){
@@ -885,6 +1028,14 @@ function goTo(name){
   document.getElementById('screen-'+name).classList.add('active');
   if(name==='setup') renderCategoryGrid();
   window.scrollTo(0,0);
+}
+let howToReturnScreen = 'home';
+function openHowTo(fromScreen){
+  howToReturnScreen = fromScreen;
+  goTo('howto');
+}
+function closeHowTo(){
+  goTo(howToReturnScreen);
 }
 
 /* ================= SETUP CONTROLS ================= */
@@ -895,6 +1046,7 @@ function adjustPlayers(delta){
   document.getElementById('playerCount').textContent = next;
   const maxImp = Math.max(1, Math.floor(next/2) - 1) ;
   if(state.numImposters > maxImp){ state.numImposters = maxImp; document.getElementById('imposterCount').textContent = maxImp; }
+  saveSettings();
 }
 function adjustImposters(delta){
   const maxImp = Math.max(1, Math.floor(state.numPlayers/2) - 1);
@@ -902,16 +1054,19 @@ function adjustImposters(delta){
   if(next < 1 || next > maxImp) return;
   state.numImposters = next;
   document.getElementById('imposterCount').textContent = next;
+  saveSettings();
 }
 function adjustTimer(delta){
   const next = state.timerMinutes + delta;
   if(next < 1 || next > 10) return;
   state.timerMinutes = next;
   document.getElementById('timerMinutes').textContent = next;
+  saveSettings();
 }
 function toggleHint(){
   state.hintEnabled = !state.hintEnabled;
   document.getElementById('hintSwitch').classList.toggle('on', state.hintEnabled);
+  saveSettings();
 }
 function renderCategoryGrid(){
   const grid = document.getElementById('catGrid');
@@ -930,6 +1085,7 @@ function renderCategoryGrid(){
       }
       renderCategoryGrid();
       updateSelectAllLabel();
+      saveSettings();
     };
     grid.appendChild(chip);
   });
@@ -946,10 +1102,24 @@ function toggleAllCategories(){
     state.selectedCategories = Object.keys(CATEGORIES);
   }
   renderCategoryGrid();
+  saveSettings();
 }
 
 /* ================= PLAYER NAMES ================= */
+function toggleCustomWord(){
+  state.customWordEnabled = !state.customWordEnabled;
+  document.getElementById('customWordSwitch').classList.toggle('on', state.customWordEnabled);
+  document.getElementById('customWordFields').style.display = state.customWordEnabled ? 'flex' : 'none';
+}
 function goToPlayerNames(){
+  if(state.customWordEnabled){
+    state.customCategory = document.getElementById('customCategoryInput').value.trim();
+    state.customWord = document.getElementById('customWordInput').value.trim();
+    if(!state.customWord){
+      alert('Enter a secret word, or turn off Custom Word to use a random one.');
+      return;
+    }
+  }
   const wrap = document.getElementById('playerInputs');
   wrap.innerHTML = '';
   for(let i=0;i<state.numPlayers;i++){
@@ -986,6 +1156,11 @@ function playAgainSameGroup(){
   renderRevealScreen();
 }
 function pickSecret(){
+  if(state.customWordEnabled && state.customWord){
+    state.secretCategory = state.customCategory || 'Custom';
+    state.secretWord = state.customWord;
+    return;
+  }
   const cat = state.selectedCategories[Math.floor(Math.random()*state.selectedCategories.length)];
   let words = CATEGORIES[cat].filter(w=>!state.wordHistory.includes(w));
   if(words.length===0) words = CATEGORIES[cat];
@@ -1110,7 +1285,8 @@ const CATEGORY_IMG_HINT = {
   "Sports": "sport", "Jobs": "occupation person", "Places": "place location",
   "Household": "household object", "Fantasy": "", "School": "school",
   "Nature & Weather": "weather nature", "Music": "music instrument",
-  "Transportation": "vehicle", "Anime": "anime character"
+  "Transportation": "vehicle", "Anime": "anime character",
+  "Video Games": "video game", "Countries": "country flag map"
 };
 
 // Sanity-check that a result actually relates to the word we searched for,
@@ -1237,6 +1413,7 @@ function handleRevealAction(){
     document.getElementById('idCard').classList.add('flipped');
     state.cardFlipped = true;
     document.getElementById('revealActionBtn').textContent = "Got It — Next Player";
+    vibrate(20);
   } else {
     state.revealIndex++;
     if(state.revealIndex >= state.numPlayers){
@@ -1294,6 +1471,7 @@ function toggleTimer(){
         state.timerRunning = false;
         document.getElementById('timerToggleBtn').textContent = 'Start';
         document.getElementById('timerState').textContent = "Time's Up!";
+        vibrate([150, 80, 150, 80, 150]);
       }
     },1000);
   }
@@ -1308,6 +1486,11 @@ function resetTimer(){
 }
 
 /* ================= VOTE ================= */
+const AVATAR_PALETTE = ['#7c5cff','#ff3b5c','#ffc857','#3ddc97','#4dabf7','#f783ac','#ff922b','#845ef7'];
+function avatarColor(i){
+  return AVATAR_PALETTE[i % AVATAR_PALETTE.length];
+}
+
 function renderVoteGridOnEnter(){
   const grid = document.getElementById('voteGrid');
   grid.innerHTML = '';
@@ -1323,7 +1506,7 @@ function renderVoteGridOnEnter(){
   state.playerNames.forEach((name,i)=>{
     const card = document.createElement('div');
     card.className = 'vote-card';
-    card.innerHTML = `<div class="avatar">${name.charAt(0).toUpperCase()}</div><div class="vname">${name}</div>`;
+    card.innerHTML = `<div class="avatar" style="--ac:${avatarColor(i)};">${name.charAt(0).toUpperCase()}</div><div class="vname">${name}</div>`;
     card.onclick = ()=>{
       const idx = state.votedIndices.indexOf(i);
       if(idx > -1){
@@ -1366,29 +1549,81 @@ function revealResults(){
     sub.textContent = state.imposterIndices.length > 1
       ? `${chosenNames} were caught — every imposter is exposed.`
       : `${chosenNames} was caught — the imposter is exposed.`;
+    vibrate([40, 60, 40]);
   } else {
     banner.className = 'result-banner lose';
     title.textContent = '😈 Imposter Escapes!';
     sub.textContent = `The group didn't catch them all — at least one imposter got away.`;
+    vibrate([120]);
   }
+
+  // Each player scores a point when their role matches the side that won
+  // this round — civilians score when the imposter(s) are caught, and any
+  // imposter who evades detection scores instead.
+  const roundWinners = state.playerNames.map((name, i) => {
+    const isImp = state.imposterIndices.includes(i);
+    const won = allCorrect ? !isImp : isImp;
+    if(won) addScore(name, 1);
+    return won;
+  });
+  saveSettings();
+
   document.getElementById('resultWord').textContent = `${state.secretWord} (${state.secretCategory})`;
 
   const list = document.getElementById('resultList');
   list.innerHTML = '';
-  state.playerNames.forEach((name,i)=>{
-    const isImp = state.imposterIndices.includes(i);
-    const row = document.createElement('div');
-    row.className = 'reveal-row';
-    row.innerHTML = `<div class="rname">${name}</div><div class="tag ${isImp?'imp':'civ'}">${isImp?'Imposter':'Civilian'}</div>`;
-    list.appendChild(row);
-  });
+  state.playerNames
+    .map((name, i) => ({ name, i }))
+    .sort((a, b) => getScore(b.name) - getScore(a.name))
+    .forEach(({ name, i }) => {
+      const isImp = state.imposterIndices.includes(i);
+      const row = document.createElement('div');
+      row.className = 'reveal-row';
+      row.innerHTML = `
+        <div class="rname"><span class="avatar-dot" style="background:${avatarColor(i)}"></span>${name}</div>
+        <div class="reveal-row-right">
+          <div class="tag ${isImp?'imp':'civ'}">${isImp?'Imposter':'Civilian'}</div>
+          <div class="player-score">${getScore(name)} pt${getScore(name)===1?'':'s'}${roundWinners[i] ? ' <span class=\"score-gain\">+1</span>' : ''}</div>
+        </div>
+      `;
+      list.appendChild(row);
+    });
 
+  renderHomeScore();
   goTo('results');
+}
+function renderHomeScore(){
+  const el = document.getElementById('homeScore');
+  if(!el) return;
+  const entries = Object.entries(state.playerScores).filter(([,v]) => v > 0);
+  if(entries.length === 0){
+    el.style.display = 'none';
+    return;
+  }
+  entries.sort((a,b) => b[1] - a[1]);
+  const [leaderKey, leaderScore] = entries[0];
+  // Recover a display name for the leader — names were lowercased as the storage key
+  const displayName = state.playerNames.find(n => scoreKey(n) === leaderKey) || leaderKey;
+  el.style.display = 'flex';
+  el.innerHTML = entries.length > 1
+    ? `<span>🏆 <b>${displayName}</b> leads with ${leaderScore} pt${leaderScore===1?'':'s'}</span><span class="score-div">·</span><span>${entries.length} players scored</span>`
+    : `<span>🏆 <b>${displayName}</b> leads with ${leaderScore} pt${leaderScore===1?'':'s'}</span>`;
+}
+function resetScore(){
+  state.playerScores = {};
+  saveSettings();
+  renderHomeScore();
 }
 
 /* ================= INIT ================= */
+loadSettings();
+document.getElementById('playerCount').textContent = state.numPlayers;
+document.getElementById('imposterCount').textContent = state.numImposters;
+document.getElementById('timerMinutes').textContent = state.timerMinutes;
+document.getElementById('hintSwitch').classList.toggle('on', state.hintEnabled);
 renderCategoryGrid();
 updateTimerDisplay();
+renderHomeScore();
 </script>
 </body>
 </html>
